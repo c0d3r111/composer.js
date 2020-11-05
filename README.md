@@ -5,8 +5,8 @@ Front-end development tool
 
 ```html
 
-<section id="section-main">
-  <div class="main-menu">
+<section id="section-nav">
+  <nav class="menu">
     <img id="logo" src="https://...">
     <ul>
       <li>Home</li>
@@ -14,27 +14,31 @@ Front-end development tool
       <li>Shop</li>
       <li>Contact</li>
     </ul>
-  </div>
+  </nav>
 </section>
 
 ```
 
-Composer translation
+Composer node translation
 
 ```javascript
 
-const create  = window._COMPOSER.export();
-const body    = create(document.body); // create accepts HTML tag name or HTML element
-const section = create('section').id('section-main');
-const menu    = create().names('main-menu'); // div is the default node
+// convert document body into composer object
+const body = create.raw(document.body);
 
-void menu.add([
-  create('img').id('logo').link('https://...'),
-  create('ul').add(['Home', 'Blog', 'Shop', 'Contact']
-              .map(name => create('li').text(name))
-]);
+// create nav node 
+const nav  = function(links) {
+  const section = create.section.id('section-nav');
+  const nav     = create.nav.names('menu');
+  const menu    = create.ul.add(links.map(name => create.li.text(name)));
+  
+  void nav.add(create.img.id('logo').link('https://...'));
+  void nav.add(menu);
+  
+  return section.add(nav);
+};
 
-void body.add(section.add(menu));
+void body.add(nav(['Home', 'Blog', 'Shop', 'Contact']));
 
 ```
 
