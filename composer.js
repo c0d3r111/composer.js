@@ -1,184 +1,321 @@
-//testing
-window._COMPOSER = Object.freeze({
-  add    : function(nodes) {
-    const fragment = document.createDocumentFragment();
-    
-    if (!Array.isArray(nodes)) nodes = [nodes];
+/**
+ *
+ * composer.js - https://github.com/c0d3r111/composer.js
+ * Released under the MIT license
+ *
+**/
 
-    for (let node of nodes) {
-      if (node) {
-        if (Array.isArray(node)) {
-          void this.add(node);
-        }
-        else {
-          // void this.element.appendChild(node.element);
-          void fragment.appendChild(node.element);
-        }
-      }
-    }
-
-    void this.element.appendChild(fragment);
-    
-    return this;
-  },
-  append : function(text) {
-    if (Array.isArray(text)) {
-      const current = this.element.innerText;
+!function() {
+  if (!window.composer) {
+    window.composer = Object.create(null);
   
-      this.element.innerText = current + (text.join(''));
+    const composer  = window.composer;
+  }
+  if (!window.create)   {
+    window.create = Object.create(null);
+    
+    const create  = window.create;
+  }
+  
+  create.node       = function()                      {
+    if (!this.tag) return;
+    
+    const obj    = Object.create(composer);
+    
+    obj.element  = document.createElement(this.tag);
+    obj.data     = Object.create(null);
+  
+    return obj;
+  };
+  create.raw        = function(subject)               {
+    const node = Object.create(composer);
+    
+    if (!subject) {
+      return create.div;
+    }
+    
+    if (typeof subject === 'string') {
+      if (subject[0] === '<') {
+        const temp     = document.createElement('div');
+        
+        temp.innerHTML = subject;
+        node.element   = temp.firstChild || document.createElement('div');
+      }
+      else {
+        node.element = document.createElement('div');
+      }
     }
     else {
-      const current = this.element.innerText;
-    
-      this.element.innerText = current + text;
+      node.element = subject instanceof HTMLElement
+        || subject instanceof SVGElement
+        ?  subject
+        :  document.createElement('div');
     }
     
-    return this;
-  },
-  after  : function(method) {
-    if (typeof method === 'function') void method();
+    return node;
+  };
+  create.cssmedia   = function(sheet, obj, name, id)  {
+    void sheet.push(name + '{');
     
-    return this;
-  },
-  attr   : function(attributes) {
-    for (let attr of Object.keys(attributes)) {
-      if (!attr) continue;
-      if (!attributes[attr]) {
-        void this.element.removeAttribute(attr);
-      }
+    for (let prop of Object.keys(obj)) {
+      void create.cssrule(sheet, obj[prop], prop, id)
+    }
+    
+    void sheet.push('}');
+  };
+  create.cssrule    = function(sheet, obj, prop, id)  {
+    void sheet.push(prop.split(',').map(item => id + ' ' + item).join(',') + '{');
+    
+    const reg = /_/g;
       
-      void this.element.setAttribute(attr, attributes[attr]);
+    for (let prop of Object.keys(obj)) {
+      void sheet.push(prop.replace(reg, '-') + ':' + obj[prop] + ';');
+    }
+      
+    void sheet.push('}');
+  };
+  create.csssheet   = function(style, id)             {
+    if (!style || typeof style !== 'object') {
+      return '';
+    }
+    
+    const sheet = [];
+    
+    for (let selector of Object.keys(style)) {
+      selector[0] === '@'
+        ? void create.cssmedia (sheet, style[selector], selector, id)
+        : void create.cssrule  (sheet, style[selector], selector, id);
+    }
+    
+    return sheet.join('');
+  };
+  
+  composer.add      = function(nodes)                 {
+    if (nodes) {
+      if (!(nodes instanceof Array)) {
+        nodes.element
+          ? void this.element.appendChild(nodes.element)
+          : void 0;
+      }
+      else {
+        const fragment = document.createDocumentFragment();
+        
+        for (const node of nodes) {
+          node
+            ? node instanceof Array
+                ? void this.add(node)
+                : node.element
+                    ? void fragment.appendChild(node.element)
+                    : void this.element.appendChild(node)
+            : void 0;
+        }
+    
+        void this.element.appendChild(fragment);
+      }
     }
     
     return this;
-  },
-  clear  : function() {
+  };
+  composer.alt      = function(text)                  {
+    void this.element.setAttribute('alt', String(text));
+    
+    return this;
+  };
+  composer.append   = function(text)                  {
+    this.element.innerText = this.element.innerText + (text || "");
+  
+    return this;
+  };
+  composer.attr     = function(attributes)            {
+    if (attributes instanceof Object) {
+      for (const attr of Object.keys(attributes)) {
+        if (!attr) continue;
+        
+        !attributes[attr]
+          ? void this.element.removeAttribute(attr)
+          : void this.element.setAttribute(attr, attributes[attr]);
+      }
+    }
+    
+    return this;
+  };
+  composer.clear    = function()                      {
     while (this.element.firstChild) {
       void this.element.removeChild(this.element.firstChild);
     }
-
+  
     return this;
-  },
-  click  : function(method) {
-    if (method) void this.element.addEventListener('click', method);
-    
-    return this;
-  },
-  danger : function(data) {
-    if (data) this.element.innerHTML = data;
-    
-    return this;
-  },
-  export : function() {
-    return this.node.bind(this);
-  },
-  event  : function(name, method) {
-    void window.addEventListener(name, method);
-    
-    return this;
-  },
-  hide   : function(event) {
-    if (!event) this.element.style.display = 'none';
-
-    return this;
-  },
-  id     : function(id) {
-    if (id) this.element.id = id;
-    
-    return this;
-  },
-  link   : function(url) {
-    this.element.href = url || 'javascript:void(0)';
-    
-    return this;
-  },
-  names  : function(names) {
-    if (names) {
-      for (let name of names.split(' ')) {
-        if (name) {
-          this.element.classList.add(name);
-        }
-      }
+  };
+  composer.click    = function(method)                {
+    if (method instanceof Function) {
+      this.element.onclick = method;
     }
     
     return this;
-  },
-  node   : function(type) {
-    const node = Object.create(this);
+  };
+  composer.copy     = function()                      {
+    let obj         = Object.create(this);
+        obj.element = this.element.cloneNode(true);
     
-    if (typeof type === 'object') {
-      node.element = type;
+    obj.element.onclick = this.element.onclick;
+    
+    return obj;
+  };
+  composer.event    = function(name, method)          {
+    if (name && method) {
+      void this.element.addEventListener(name, method);
+    }
+  
+    return this;
+  };
+  composer.fadein   = function(unit)                  {
+    this.element.style.transition = 'all 0.5s';
+    
+    void this.style({left: unit}, 10);
+    
+    return this;
+  };
+  composer.hide     = function(delay)                 {
+    void setTimeout(() => {
+      this.element.style.display = 'none';
+    }, delay || 0);
+  
+    return this;
+  };
+  composer.html     = function(data)                  {
+    if (typeof data === 'string') {
+      this.element.innerHTML = data;
+    }
+    
+    return this;
+  };
+  composer.id       = function(name)                  {
+    if (name) {
+      this.store[name] = this.element.id || this.store[name] || this.rid();
+      this.element.id  = this.store[name];
     }
     else {
-      node.element = document.createElement(type || 'div');
-    }
-        
-    return node;
-  },
-  on     : function(event, method) {
-    if (method) this.element["on" + event] = method;
-    
-    return this;
-  },
-  play   : function() {
-    this.element.style.animationPlayState = 'running';
-    this.element.style.animationDuration  = '2s';
-
-    return this;
-  },
-  pause  : function() {
-    this.element.style.animationPlayState = 'paused';
-    this.element.style.animationDuration  = '0s';
-
-    return this;
-  },
-  save   : function() {
-    return function() { return this; }.bind(this);
-  },
-  show   : function(flex, inline) {
-    this.element.style.display = flex ? 'flex' : inline ? 'inline-block' : 'block';
-
-    return this;
-  },
-  size   : function(size, units) {
-    if (size) this.element.style.fontSize = size + (units || 'px');
-    
-    return this;
-  },
-  src    : function(location) {
-    if (location) this.element.src = location;
-    
-    return this;
-  },
-  style  : function(style) {
-    for (let property of Object.keys(style)) {
-      if (property) this.element.style[property] = style[property];
+      this.element.id  = this.rid();
     }
     
     return this;
-  },
-  string : function() {
-    return `<${this.element.tagName.toLowerCase()}>${this.element.innerHTML}</${this.element.tagName.toLowerCase()}>`;
-  },
-  text   : function(text) {
-    if (text || text === '0' || text === 0) {
-      this.element.innerText = text;
+  };
+  composer.link     = function(url)                   {
+    const tag = this.element.tagName;
+    
+    if (tag === 'A' || tag === 'LINK') {
+      void this.element.setAttribute('href', url);
+    }
+    else {
+      void this.element.setAttribute('src', url);
     }
     
     return this;
-  },
-  toggle : function(name) {
+  };
+  composer.names    = function(names)                 {
+    if (names) {
+      void this.element.setAttribute('class', names);
+    }
+    
+    return this;
+  };
+  composer.navigate = function(url)                   {
+    if (url) {
+      this.element.onclick = function() {
+        window.location.href = this.url;
+      }.bind({
+        url: String(url)
+      });
+    }
+    
+    return this;
+  };
+  composer.on       = function(event, method)         {
+    if (method instanceof Function) {
+      this.element["on" + event] = method;
+    }
+    
+    return this;
+  };
+  composer.remove   = function(delay)                 {
+    void setTimeout(() => this.element.remove(), delay || 0);
+    
+    return this;
+  };
+  composer.rid      = function()                      {
+    return String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+        +  Math.random().toString(16).slice(2)
+        +  String.fromCharCode(Math.floor(Math.random() * 26) + 97);
+  };
+  composer.show     = function(type)                  {
+    this.element.style.display = type || 'block';
+  
+    return this;
+  };
+  composer.style    = function(style, delay)          {
+    if (!delay) {
+      for (const property of Object.keys(style)) {
+        if (property) this.element.style[property] = style[property];
+      }
+    }
+    else {
+      void setTimeout(() => {
+        for (const property of Object.keys(style)) {
+          if (property) this.element.style[property] = style[property];
+        }
+      }, delay);
+    }
+    
+    return this;
+  };
+  composer.submit   = function(method)                {
+    if (method instanceof Function) {
+      this.element.onsubmit = method;
+    }
+    
+    return this;
+  };
+  composer.text     = function(text)                  {
+    this.element.innerText = String(text);
+    
+    return this;
+  };
+  composer.toggle   = function(name)                  {
     if (name) {
-      this.element.classList.toggle(name);
+      void this.element.classList.toggle(String(name));
     }
-
+  
     return this;
-  }, 
-  value  : function(value) {
-     if (value || value === '0' || value === 0) {
-			 this.element.value = value;
-		 }
+  };
+  composer.value    = function(value)                 {
+    if (value || value === '0' || value === 0) {
+      this.element.value = value;
+    }
     
     return this;
-  },
-});
+  };
+  composer.store    = Object.create(null);
+  
+  const tags = [
+    "a","abbr","address","area","article","aside","audio","b","base","bdi","bdo","blockquote","body","br","button","canvas","caption","cite","code","col","colgroup","data","datalist","dd","del","details","dfn","dialog","div","dl","dt","em","embed","fieldset","figcaption","figure","footer","form","h1","h2","h3","h4","h5","h6","head","header","hr","html","i","iframe","img","input","ins","kbd","label","legend","li","link","main","map","mark","meta","meter","nav","noscript","object","ol","optgroup","option","output","p","param","picture","pre","progress","q","rp","rt","ruby","s","samp","script","section","select","small","source","span","strong","style","sub","summary","sup","svg","table","tbody","td","template","textarea","tfoot","th","thead","time","title","tr","track","u","ul","var","video","wbr"
+  ];
+  
+  for (let tag of tags) {
+    void Object.defineProperty(create, tag, {
+      get: create.node.bind(Object.create(null, {tag: {value: tag}}))
+    });
+  }
+  
+  void Object .freeze(composer);
+  void Object .freeze(create);
+  
+  window.Node = function(style) {
+    const parent = create.div.id();
+    const id     = '#' + parent.element.id;
+    
+    return parent
+      .add(create.style
+        .text(create.csssheet(style, id)));
+  };
+}();
+
