@@ -6,16 +6,8 @@
 **/
 
 !function() {
-  if (!window.composer) {
-    window.composer = Object.create(null);
-  
-    const composer  = window.composer;
-  }
-  if (!window.create)   {
-    window.create = Object.create(null);
-    
-    const create  = window.create;
-  }
+  window.composer   = window.composer || Object.create(null);  
+  window.create     = window.create   || Object.create(null);
   
   create.node       = function()                      {
     if (!this.tag) return;
@@ -311,11 +303,10 @@
   
   window.Node = function(style) {
     const parent = create.div.id();
-    const id     = '#' + parent.element.id;
     
     return parent
       .add(create.style
-        .text(create.csssheet(style, id)));
+        .text(create.csssheet(style, '#' + parent.element.id)));
   };
 }();
 
