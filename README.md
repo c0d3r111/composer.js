@@ -31,9 +31,9 @@ create.section
         .names ('menu')
         .add   (create.img
             .id   ('logo')
-            .link ('https://...'))
+            .link (linkLogo))
         .add(create.ul
-            .add(links.map(name => create.li.text(name))))
+            .add(linkNames.map(name => create.li.text(name))))
 
 ```
 
