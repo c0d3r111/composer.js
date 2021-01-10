@@ -22,23 +22,18 @@ Front-end development tool
 Composer node translation
 
 ```javascript
+const linkNames = ['Home', 'Blog', 'Shop', 'Contact'];
+const linkLogo  = 'https://example.com/logo.jpg';
 
-// convert document body into composer object
-const body = create.raw(document.body);
-
-// create nav node 
-const nav  = function(links) {
-  const section = create.section.id('section-nav');
-  const nav     = create.nav.names('menu');
-  const menu    = create.ul.add(links.map(name => create.li.text(name)));
-  
-  void nav.add(create.img.id('logo').link('https://...'));
-  void nav.add(menu);
-  
-  return section.add(nav);
-};
-
-void body.add(nav(['Home', 'Blog', 'Shop', 'Contact']));
+create.section
+    .id  ('section-nav')
+    .add (create.nav
+        .names ('menu')
+        .add   (create.img
+            .id   ('logo')
+            .link ('https://...'))
+        .add(create.ul
+            .add(links.map(name => create.li.text(name))))
 
 ```
 
