@@ -149,13 +149,13 @@ class Composer {
     }
     attr(attributes) {
         if (attributes instanceof Object) {
-            for (const attr of Object.keys(attributes)) {
-                if (!attr) continue;
+            void Object.keys(attributes).forEach(attr => {
+                if (!attr) return;
 
                 !attributes[attr]
                     ? void this.element.removeAttribute(attr)
                     : void this.element.setAttribute(attr, attributes[attr]);
-            }
+            });
         }
 
         return this;
@@ -175,9 +175,9 @@ class Composer {
         return this;
     }
     copy() {
-        let obj = Object.create(this);
-        obj.element = this.element.cloneNode(true);
+        const obj = Object.create(this);
 
+        obj.element         = this.element.cloneNode(true);
         obj.element.onclick = this.element.onclick;
 
         return obj;
@@ -186,13 +186,6 @@ class Composer {
         if (name && method) {
             void this.element.addEventListener(name, method);
         }
-
-        return this;
-    }
-    fadein(unit) {
-        this.element.style.transition = 'all 0.5s';
-
-        void this.style({ left: unit }, 10);
 
         return this;
     }
@@ -213,10 +206,9 @@ class Composer {
     id(name) {
         if (name) {
             this.store[name] = this.element.id || this.store[name] || this.rid();
-            this.element.id = this.store[name];
-        }
-        else {
-            this.element.id = this.rid();
+            this.element.id  = this.store[name];
+        } else {
+            this.element.id  = this.rid();
         }
 
         return this;
@@ -224,12 +216,9 @@ class Composer {
     link(url) {
         const tag = this.element.tagName;
 
-        if (tag === 'A' || tag === 'LINK') {
-            void this.element.setAttribute('href', url);
-        }
-        else {
-            void this.element.setAttribute('src', url);
-        }
+        tag === 'A' || tag === 'LINK'
+            ? void this.element.setAttribute('href', url)
+            : void this.element.setAttribute('src', url);
 
         return this;
     }
@@ -275,19 +264,15 @@ class Composer {
     }
     style(style, delay) {
         if (!delay) {
-            for (const property of Object.keys(style)) {
+            void Object.keys(style).forEach(property => {
                 if (property) this.element.style[property] = style[property];
-            }
-        }
-        else {
-            void setTimeout(() => {
-                for (const property of Object.keys(style)) {
-                    if (property) this.element.style[property] = style[property];
-                }
-            }, delay);
+            });
+
+            return this;
+
         }
 
-        return this;
+        return void setTimeout(() => void this.style(style), delay);
     }
     submit(method) {
         if (method instanceof Function) {
