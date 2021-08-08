@@ -18,15 +18,26 @@ Front-end development tool
 </section>
 
 ```
+```javascript
 
-Composer node translation
+document.getElementById('section-nav').onclick = function(e) {
+    // do something
+};
+
+```
+
+Composer.js translation
 
 ```javascript
-const linkNames = ['Home', 'Blog', 'Shop', 'Contact'].map(name => create.li.text(name));
-const linkLogo  = 'https://example.com/logo.jpg';
+const linkNames    = ['Home', 'Blog', 'Shop', 'Contact'].map(name => create.li.text(name));
+const linkLogo     = 'https://example.com/logo.jpg';
+const sectionClick = function(e) {
+    // do something
+};
 
 create.section
     .id('section-nav')
+    .click(sectionClick)
     .add(create.nav
         .names('menu')
         .add(create.img
