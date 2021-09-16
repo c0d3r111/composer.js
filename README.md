@@ -38,13 +38,10 @@ const sectionClick = function(e) {
 create.section
     .id('section-nav')
     .click(sectionClick)
-    .add(create.nav
-        .names('menu')
-        .add(create.img
-            .id('logo')
-            .link(linkLogo))
-        .add(create.ul
-            .add(linkNames))
+    .add(create.nav.names('menu').add([
+        create.img.id('logo').link(linkLogo)
+        create.ul.add(linkNames)
+    ]));
 
 ```
 
