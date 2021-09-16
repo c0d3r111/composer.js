@@ -39,7 +39,7 @@ create.section
     .id('section-nav')
     .click(sectionClick)
     .add(create.nav.names('menu').add([
-        create.img.id('logo').link(linkLogo)
+        create.img.id('logo').link(linkLogo),
         create.ul.add(linkNames)
     ]));
 
