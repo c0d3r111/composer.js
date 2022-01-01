@@ -29,19 +29,18 @@ document.getElementById('section-nav').onclick = function(e) {
 Composer.js translation
 
 ```javascript
-const linkNames    = ['Home', 'Blog', 'Shop', 'Contact'].map(name => create.li.text(name));
-const linkLogo     = 'https://example.com/logo.jpg';
 const sectionClick = function(e) {
     // do something
 };
 
-create.section
-    .id('section-nav')
+create.section.id('section-nav')
     .click(sectionClick)
-    .add(create.nav.names('menu').add([
-        create.img.id('logo').link(linkLogo),
-        create.ul.add(linkNames)
-    ]));
+    .add(create.nav.names('menu')
+        .add([
+            create.img.id('logo').link("https://..."),
+            create.ul.add(['Home', 'Blog', 'Shop', 'Contact']
+                .map(name => create.li.text(name)))
+        ]));
 
 ```
 
