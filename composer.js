@@ -2,7 +2,7 @@
  * Released under the MIT license
  */
 
-!function() {
+!(function() {
     class Composer {
         constructor(tag) {
             this.element     = document.createElement(tag || 'div');
